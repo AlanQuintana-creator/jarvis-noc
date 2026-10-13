@@ -70,7 +70,7 @@
         <h2>Acceso de prueba</h2>
         <label class="field-label" for="api-key">Clave local de Jarvis</label>
         <input id="api-key" class="key" type="password" autocomplete="off" placeholder="JARVIS_API_KEY">
-        <p class="hint">Se conserva solo mientras esta página está abierta.</p>
+        <p class="hint">Copiá <strong>JARVIS_API_KEY</strong> desde tu archivo .env. Esta clave es distinta de la clave de Groq y se conserva solo mientras la página está abierta.</p>
         <button id="check" class="subtle-btn" type="button">Comprobar conexión</button>
       </section>
       <section class="aside-section">
@@ -125,9 +125,9 @@
         if (!response.ok) throw new Error(await errorText(response));
         const data = await response.json();
         const chat = document.querySelector('#chat-status'); const stt = document.querySelector('#stt-status');
-        chat.textContent = data.chat ? 'Listo' : 'Sin proveedor'; chat.classList.toggle('ready', data.chat);
-        stt.textContent = data.transcription ? 'Listo' : 'Sin proveedor'; stt.classList.toggle('ready', data.transcription);
-        setNotice(data.chat ? 'Conexión lista. Podés escribir o grabar una pregunta.' : 'La clave funciona; falta configurar un proveedor de chat.', !data.chat);
+        chat.textContent = data.chat ? 'Configurado' : 'Sin proveedor'; chat.classList.toggle('ready', data.chat);
+        stt.textContent = data.transcription ? 'Configurado' : 'Sin proveedor'; stt.classList.toggle('ready', data.transcription);
+        setNotice(data.chat ? 'Clave local correcta. Enviá una pregunta para verificar la clave del proveedor.' : 'La clave local funciona; falta configurar un proveedor de chat.', !data.chat);
       } catch (error) { setNotice(`Conexión: ${error.message}`, true); }
     }
     function speak(text) {

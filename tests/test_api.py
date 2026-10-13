@@ -78,3 +78,18 @@ def test_chat_streams_provider_tokens(monkeypatch):
     assert response.status_code == 200
     assert '"delta": "Hola"' in response.text
     assert "data: [DONE]" in response.text
+
+
+def test_chat_explains_rejected_provider_key(monkeypatch):
+    monkeypatch.setenv("JARVIS_API_KEY", "test-key")
+    monkeypatch.setenv("JARVIS_MODEL_BASE_URL", "http://model.test/v1")
+    monkeypatch.setenv("JARVIS_MODEL_API_KEY", "bad-key")
+    monkeypatch.setenv("JARVIS_MODEL_NAME", "test-model")
+    original_client = httpx.AsyncClient
+    transport = httpx.MockTransport(lambda request: httpx.Response(401, json={"error": "unauthorized"}))
+    monkeypatch.setattr(main.httpx, "AsyncClient", lambda **kwargs: original_client(transport=transport, **kwargs))
+    response = client.post(
+        "/v1/chat/stream", headers={"Authorization": "Bearer test-key"}, json={"message": "hola"}
+    )
+    assert response.status_code == 200
+    assert "El proveedor rechazó la clave" in response.text

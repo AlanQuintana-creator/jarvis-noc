@@ -78,8 +78,18 @@ async def completion_stream(request: ChatRequest, config: dict[str, str]) -> Asy
                         continue
                     if isinstance(delta, str) and delta:
                         yield f"data: {json.dumps({'delta': delta}, ensure_ascii=False)}\n\n"
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code in {401, 403}:
+            message = "El proveedor rechazó la clave del modelo. Revisá JARVIS_MODEL_API_KEY en .env y reiniciá Jarvis."
+        elif exc.response.status_code == 429:
+            message = "El proveedor alcanzó su límite de uso. Esperá y volvé a intentar."
+        elif exc.response.status_code == 404:
+            message = "El modelo o la URL del proveedor no existe. Revisá JARVIS_MODEL_NAME y JARVIS_MODEL_BASE_URL."
+        else:
+            message = f"El proveedor respondió HTTP {exc.response.status_code}."
+        yield f"data: {json.dumps({'error': message}, ensure_ascii=False)}\n\n"
     except httpx.HTTPError:
-        yield f"data: {json.dumps({'error': 'El proveedor de IA no respondió.'})}\n\n"
+        yield f"data: {json.dumps({'error': 'No se pudo contactar al proveedor de IA.'})}\n\n"
     yield "data: [DONE]\n\n"
 
 
@@ -128,6 +138,13 @@ async def transcribe(audio: UploadFile = File(...)) -> dict[str, str]:
             response.raise_for_status()
             parsed = response.json()
             text = parsed.get("text") if isinstance(parsed, dict) else None
+    except httpx.HTTPStatusError as exc:
+        message = (
+            "El proveedor rechazó la clave de transcripción. Revisá JARVIS_STT_API_KEY en .env y reiniciá Jarvis."
+            if exc.response.status_code in {401, 403}
+            else f"El proveedor de transcripción respondió HTTP {exc.response.status_code}."
+        )
+        raise HTTPException(status_code=502, detail=message) from exc
     except (httpx.HTTPError, ValueError) as exc:
         raise HTTPException(status_code=502, detail="Falló la transcripción.") from exc
     if not isinstance(text, str):
