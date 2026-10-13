@@ -27,10 +27,10 @@ py -m venv .venv
 Copy-Item .env.example .env
 ```
 
-Abrí `.env` y completá `JARVIS_API_KEY` con una clave propia. Para probar chat y micrófono con la configuración de ejemplo, conseguí una clave de [GroqCloud](https://console.groq.com/keys) y pegala en `JARVIS_MODEL_API_KEY` y `JARVIS_STT_API_KEY`. Nunca publiques ese archivo ni pegues la clave en un issue. El script carga `.env` solo en el proceso local:
+Abrí `.env` y completá `JARVIS_API_KEY` con una clave propia. Para probar chat y micrófono con la configuración de ejemplo, conseguí una clave de [GroqCloud](https://console.groq.com/keys) y pegala en `JARVIS_MODEL_API_KEY` y `JARVIS_STT_API_KEY`. Nunca publiques ese archivo ni pegues la clave en un issue. El iniciador carga `.env` solo en el proceso local:
 
 ```powershell
-.\start-demo.ps1
+.venv\Scripts\python.exe run.py
 ```
 
 Abrí **http://127.0.0.1:8010/demo**. Ingresá la `JARVIS_API_KEY` de tu `.env`, presioná **Comprobar conexión** y escribí una pregunta. Para usar el micrófono, permití el acceso del navegador, presioná el botón para iniciar y detener la grabación, revisá el texto transcrito y presioná **Enviar**. La casilla **Leer respuesta en voz alta** usa la voz disponible en el navegador. La clave ingresada en la página permanece solo en la memoria de esa pestaña.
