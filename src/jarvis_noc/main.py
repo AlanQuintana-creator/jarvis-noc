@@ -6,13 +6,15 @@ import json
 import os
 import secrets
 from collections.abc import AsyncIterator
+from pathlib import Path
 
 import httpx
 from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
-from fastapi.responses import Response, StreamingResponse
+from fastapi.responses import FileResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
 app = FastAPI(title="Jarvis NOC", version="0.1.0")
+DEMO_HTML = Path(__file__).parent / "static" / "demo.html"
 
 SYSTEM_PROMPT = (
     "Sos Jarvis, un asistente para operadores NOC. Respondé en español claro. "
@@ -84,6 +86,23 @@ async def completion_stream(request: ChatRequest, config: dict[str, str]) -> Asy
 @app.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok", "service": "jarvis-noc"}
+
+
+@app.get("/demo", include_in_schema=False)
+async def demo() -> FileResponse:
+    return FileResponse(DEMO_HTML)
+
+
+@app.get("/v1/status", dependencies=[Depends(require_api_key)])
+async def status() -> dict[str, bool]:
+    def configured(prefix: str, required: tuple[str, ...]) -> bool:
+        return all(os.getenv(f"JARVIS_{prefix}_{key}", "").strip() for key in required)
+
+    return {
+        "chat": configured("MODEL", ("BASE_URL", "API_KEY", "NAME")),
+        "transcription": configured("STT", ("BASE_URL", "API_KEY", "MODEL")),
+        "speech": configured("TTS", ("BASE_URL", "API_KEY", "MODEL", "VOICE")),
+    }
 
 
 @app.post("/v1/chat/stream", dependencies=[Depends(require_api_key)])

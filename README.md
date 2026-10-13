@@ -4,7 +4,7 @@ Asistente abierto de texto y voz para operaciones NOC. Este repositorio se desar
 
 ## Estado
 
-Primera base ejecutable (v0.1): API de chat por streaming, transcripción de audio, síntesis de voz y una política de capacidades con denegación predeterminada. Todavía no hay conectores a Zabbix, GLPI ni a la plataforma NOC; Jarvis no puede ejecutar acciones operativas.
+Primera base ejecutable (v0.1): página local de prueba con chat y micrófono, API de chat por streaming, transcripción de audio, síntesis de voz y una política de capacidades con denegación predeterminada. Todavía no hay conectores a Zabbix, GLPI ni a la plataforma NOC; Jarvis no puede ejecutar acciones operativas.
 
 El código tiene licencia MIT. Cada modelo de IA y cada voz usados por un despliegue conservan **sus propias licencias y condiciones**.
 
@@ -27,17 +27,15 @@ py -m venv .venv
 Copy-Item .env.example .env
 ```
 
-Configurá un `JARVIS_API_KEY` propio y los proveedores necesarios en el entorno. El archivo `.env` es una referencia para valores; Uvicorn no lo carga automáticamente. Por ejemplo:
+Abrí `.env` y completá `JARVIS_API_KEY` con una clave propia. Para probar chat y micrófono con la configuración de ejemplo, conseguí una clave de [GroqCloud](https://console.groq.com/keys) y pegala en `JARVIS_MODEL_API_KEY` y `JARVIS_STT_API_KEY`. Nunca publiques ese archivo ni pegues la clave en un issue. El script carga `.env` solo en el proceso local:
 
 ```powershell
-$env:JARVIS_API_KEY = "valor-de-desarrollo"
-$env:JARVIS_MODEL_BASE_URL = "http://localhost:11434/v1"
-$env:JARVIS_MODEL_API_KEY = "clave-del-proveedor-o-valor-local"
-$env:JARVIS_MODEL_NAME = "modelo-instalado"
-.venv\Scripts\uvicorn jarvis_noc.main:app --reload --port 8010
+.\start-demo.ps1
 ```
 
-Consultar `http://localhost:8010/docs` para ver el contrato HTTP. Los endpoints de voz esperan proveedores compatibles con `/v1/audio/transcriptions` y `/v1/audio/speech`. Deben configurarse `JARVIS_STT_*` y `JARVIS_TTS_*` antes de usarlos.
+Abrí **http://127.0.0.1:8010/demo**. Ingresá la `JARVIS_API_KEY` de tu `.env`, presioná **Comprobar conexión** y escribí una pregunta. Para usar el micrófono, permití el acceso del navegador, presioná el botón para iniciar y detener la grabación, revisá el texto transcrito y presioná **Enviar**. La casilla **Leer respuesta en voz alta** usa la voz disponible en el navegador. La clave ingresada en la página permanece solo en la memoria de esa pestaña.
+
+La API se documenta en `http://127.0.0.1:8010/docs`. Los endpoints de voz también permiten un proveedor TTS compatible con `/v1/audio/speech`, configurando `JARVIS_TTS_*`.
 
 ```powershell
 .venv\Scripts\python -m pytest
@@ -66,8 +64,7 @@ Las futuras herramientas de lectura y acción se implementarán en la API NOC co
 
 ## Próximos incrementos
 
-- Interfaz web de chat y pulsar para hablar, con reproducción de audio.
-- Adaptadores de proveedores y prueba integral de texto y voz.
+- Pruebas integrales con proveedores reales y evaluación de latencia de texto y voz.
 - Herramientas de solo lectura para incidentes, eventos, activos y runbooks.
 - Flujo de solicitud de acción con aprobación humana y registro auditable.
 - Integración con NOC-Plataforma después de cumplir los criterios anteriores.

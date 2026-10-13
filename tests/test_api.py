@@ -14,6 +14,12 @@ def test_health_is_public():
     assert response.json()["status"] == "ok"
 
 
+def test_demo_page_is_available():
+    response = client.get("/demo")
+    assert response.status_code == 200
+    assert "Conversa con Jarvis" in response.text
+
+
 def test_chat_requires_authentication(monkeypatch):
     monkeypatch.setenv("JARVIS_API_KEY", "test-key")
     response = client.post("/v1/chat/stream", json={"message": "hola"})
@@ -35,6 +41,18 @@ def test_voice_requires_authentication(monkeypatch):
     monkeypatch.setenv("JARVIS_API_KEY", "test-key")
     response = client.post("/v1/voice/speak", json={"text": "hola"})
     assert response.status_code == 401
+
+
+def test_status_reports_configured_services(monkeypatch):
+    monkeypatch.setenv("JARVIS_API_KEY", "test-key")
+    monkeypatch.setenv("JARVIS_MODEL_BASE_URL", "http://model.test/v1")
+    monkeypatch.setenv("JARVIS_MODEL_API_KEY", "provider-key")
+    monkeypatch.setenv("JARVIS_MODEL_NAME", "test-model")
+    monkeypatch.delenv("JARVIS_STT_API_KEY", raising=False)
+    response = client.get("/v1/status", headers={"Authorization": "Bearer test-key"})
+    assert response.status_code == 200
+    assert response.json()["chat"] is True
+    assert response.json()["transcription"] is False
 
 
 def test_chat_streams_provider_tokens(monkeypatch):
