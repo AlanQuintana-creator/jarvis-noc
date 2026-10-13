@@ -19,6 +19,20 @@ El código tiene licencia MIT. Cada modelo de IA y cada voz usados por un despli
 
 ## Desarrollo local
 
+### Docker Desktop en Windows
+
+Esta carpeta del Escritorio es la instalación independiente de Jarvis. La aplicación corre en Docker Desktop; Groq procesa las consultas y la transcripción del micrófono. La lectura de respuestas en voz alta usa la voz del navegador. Todavía no existe conexión a la plataforma NOC.
+
+1. Abrí Docker Desktop y esperá a que el motor indique que está funcionando. Docker Desktop en Windows requiere WSL 2 y la característica de Windows **Subsistema de Windows para Linux** habilitada.
+2. En PowerShell, desde esta carpeta, ejecutá `./preparar.ps1`. Crea `.env` con una clave local aleatoria. El archivo no se sube a Git.
+3. Generá una API key en [GroqCloud](https://console.groq.com/keys). Ejecutá `./configurar-groq.ps1` y pegá la clave completa cuando se solicite. No pegues esa clave en la página web.
+4. Ejecutá `docker compose up -d --build` y comprobá el estado con `docker compose ps`.
+5. Abrí [http://127.0.0.1:8010/demo](http://127.0.0.1:8010/demo). Copiá **JARVIS_API_KEY** desde `.env` al campo **Clave local de Jarvis** de la página. Presioná **Comprobar conexión** y enviá una pregunta. Para el micrófono, permití el acceso del navegador.
+
+Si cambiás la clave de Groq, ejecutá de nuevo `./configurar-groq.ps1` y después `docker compose up -d --force-recreate`. Para apagar Jarvis, ejecutá `docker compose down`. La API queda accesible únicamente desde este equipo en el puerto 8010.
+
+### Python, sin Docker
+
 Requiere Python 3.11 o superior.
 
 ```powershell

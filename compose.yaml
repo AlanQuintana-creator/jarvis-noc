@@ -1,0 +1,11 @@
+services:
+  jarvis:
+    build: .
+    container_name: jarvis-noc
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:8010:8010"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
